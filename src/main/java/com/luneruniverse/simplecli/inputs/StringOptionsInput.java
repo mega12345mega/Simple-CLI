@@ -9,9 +9,6 @@ public class StringOptionsInput extends ArgumentOrFlagImpl<String> {
 	private final Collection<String> options;
 	
 	public StringOptionsInput(Collection<String> options) {
-		if (options.size() == 0)
-			throw new IllegalArgumentException("There must be at least one option!");
-		
 		this.options = options;
 	}
 	
