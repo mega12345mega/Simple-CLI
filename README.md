@@ -31,8 +31,7 @@ All flags have a long name (like \-\-force) and can optionally have a short name
 Most types of inputs only need one token, so they can work as either an argument or flag. Use `ArgumentOrFlagImpl` to implement both `Argument` and `Flag` simultaneously. There are several built in inputs:
 
 * StringInput
-* StringOptionsInput
-* EnumInput
+* StringKeyInput
 * IntegerInput
 * DoubleInput
 
