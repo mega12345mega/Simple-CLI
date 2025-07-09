@@ -1,6 +1,7 @@
 package com.luneruniverse.simplecli.inputs;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class ParsedInputs {
 	
@@ -22,6 +23,10 @@ public class ParsedInputs {
 	
 	public boolean hasFlag(String name) {
 		return flags.containsKey(name);
+	}
+	
+	public <T> Optional<T> getFlagOptional(String name, Class<T> clazz) {
+		return hasFlag(name) ? Optional.of(getFlag(name, clazz)) : Optional.empty();
 	}
 	
 }
