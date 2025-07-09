@@ -34,6 +34,7 @@ Most types of inputs only need one token, so they can work as either an argument
 * StringKeyInput
 * BooleanInput
 * IntegerInput
+* LongInput
 * DoubleInput
 
 Arguments and flags both support filtering: `new IntegerInput().addFilter(num -> num % 2 == 0 ? null : "The number must be even!")`, and most have some built in filters: `new IntegerInput().min(0)`
