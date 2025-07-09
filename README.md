@@ -32,6 +32,7 @@ Most types of inputs only need one token, so they can work as either an argument
 
 * StringInput
 * StringKeyInput
+* BooleanInput
 * IntegerInput
 * DoubleInput
 
