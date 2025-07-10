@@ -1,5 +1,7 @@
 # Simple CLI
 
+[![Release](https://jitpack.io/v/mega12345mega/Simple-CLI.svg)](https://jitpack.io/#mega12345mega/Simple-CLI)
+
 This is a very simple Java library for parsing commands.
 
 Commands are split into tokens, where each token is separated by whitespace. Use double quotes (") around an entire token to include whitespace in that token.
