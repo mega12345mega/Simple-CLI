@@ -3,10 +3,12 @@ package com.luneruniverse.simplecli.commands;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import com.luneruniverse.simplecli.CommandParseException;
 import com.luneruniverse.simplecli.CommandStream;
+import com.luneruniverse.simplecli.CommandSyntaxException;
 import com.luneruniverse.simplecli.inputs.ParsedInputs;
 import com.luneruniverse.simplecli.inputs.arguments.Argument;
 import com.luneruniverse.simplecli.inputs.flags.Flag;
@@ -59,7 +61,7 @@ public class SingleCommand implements Command {
 	}
 	
 	@Override
-	public void parse(CommandStream stream) throws CommandParseException {
+	public void parse(CommandStream stream) throws CommandSyntaxException, CommandParseException {
 		Map<String, Object> parsedArgs = new HashMap<>();
 		for (Map.Entry<String, Argument<?>> arg : arguments.entrySet()) {
 			try {
@@ -71,16 +73,15 @@ public class SingleCommand implements Command {
 		
 		Map<String, Object> parsedFlags = new HashMap<>();
 		while (stream.hasNext()) {
-			String flag = stream.read().get();
-			int equalsIndex = flag.indexOf('=');
-			String flagName = (equalsIndex == -1 ? flag : flag.substring(0, equalsIndex));
-			String flagValue = (equalsIndex == -1 ? null : flag.substring(equalsIndex + 1));
+			Map.Entry<String, Optional<String>> flagParts = stream.readFlag().get();
+			String flagName = flagParts.getKey();
+			String flagValue = flagParts.getValue().orElse(null);
 			
-			NamedFlag matchingFlag = flags.get(flagName);
-			if (matchingFlag == null)
-				throw new CommandParseException("Unexpected '" + flag + "'");
+			NamedFlag flag = flags.get(flagName);
+			if (flag == null)
+				throw new CommandParseException("Unexpected '" + flagName + "'");
 			
-			if (matchingFlag.flag == null) {
+			if (flag.flag == null) {
 				if (flagValue != null)
 					throw new CommandParseException("Unexpected value '" + flagValue + "' for flag '" + flagName + "'");
 			} else {
@@ -89,7 +90,7 @@ public class SingleCommand implements Command {
 			}
 			
 			try {
-				parsedFlags.put(matchingFlag.fullName, flagValue == null ? true : matchingFlag.flag.parse(flagValue));
+				parsedFlags.put(flag.fullName, flagValue == null ? true : flag.flag.parse(flagValue));
 			} catch (CommandParseException e) {
 				throw new CommandParseException("While parsing flag '" + flagName + "': " + e.getMessage());
 			}

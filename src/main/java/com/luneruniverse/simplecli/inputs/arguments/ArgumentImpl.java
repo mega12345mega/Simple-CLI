@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.luneruniverse.simplecli.CommandParseException;
 import com.luneruniverse.simplecli.CommandStream;
+import com.luneruniverse.simplecli.CommandSyntaxException;
 
 public abstract class ArgumentImpl<T> implements Argument<T> {
 	
@@ -22,7 +23,7 @@ public abstract class ArgumentImpl<T> implements Argument<T> {
 	}
 	
 	@Override
-	public T parse(CommandStream stream) throws CommandParseException {
+	public T parse(CommandStream stream) throws CommandSyntaxException, CommandParseException {
 		T value = parseUnfiltered(stream);
 		for (Function<T, String> filter : filters) {
 			String error = filter.apply(value);
@@ -32,6 +33,6 @@ public abstract class ArgumentImpl<T> implements Argument<T> {
 		return value;
 	}
 	
-	protected abstract T parseUnfiltered(CommandStream stream) throws CommandParseException;
+	protected abstract T parseUnfiltered(CommandStream stream) throws CommandSyntaxException, CommandParseException;
 	
 }

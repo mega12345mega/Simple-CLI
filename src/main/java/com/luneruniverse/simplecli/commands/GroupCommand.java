@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.luneruniverse.simplecli.CommandParseException;
 import com.luneruniverse.simplecli.CommandStream;
+import com.luneruniverse.simplecli.CommandSyntaxException;
 
 public class GroupCommand implements Command {
 	
@@ -27,8 +28,8 @@ public class GroupCommand implements Command {
 	}
 	
 	@Override
-	public void parse(CommandStream stream) throws CommandParseException {
-		String name = stream.read().orElseThrow(
+	public void parse(CommandStream stream) throws CommandSyntaxException, CommandParseException {
+		String name = stream.readArg().orElseThrow(
 				() -> new CommandParseException("Incomplete command - expected: " + String.join(", ", children.keySet())));
 		Command command = children.get(name);
 		if (command == null)

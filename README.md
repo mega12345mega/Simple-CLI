@@ -4,7 +4,7 @@
 
 This is a very simple Java library for parsing commands.
 
-Commands are split into tokens, where each token is separated by whitespace. Use double quotes (") around an entire token to include whitespace in that token.
+Commands are split into tokens, where each token is separated by whitespace (or equals (=) for flags). Use double quotes (") around an entire token to include whitespace in that token.
 
 Commands are divided into three sections:
 
@@ -16,7 +16,7 @@ Command   Arguments       Flags
 
 ## Section 1: Command
 
-Build command tree structures with `GroupCommand`s, where the final command name is a `SingleCommand`. Added arguments and flags to the `SingleCommand`.
+Build command tree structures with `GroupCommand`s, where the final command name (leaf) is a `SingleCommand`. Add arguments and flags to the `SingleCommand`.
 
 ## Section 2: Arguments
 
@@ -24,7 +24,7 @@ Arguments aren't optional (use flags to make something optional). Arguments can 
 
 ## Section 3: Flags
 
-All flags have a long name (like \-\-force) and can optionally have a short name (like \-f). Flags may require a value, where the flag name and value is separated by an equals (like \-\-maxdepth=10). Note that the entire flag name, equals, and value combination is always a single token (so you would have to do this: "\-\-log=a log file.txt" instead of this: \-\-log="a log file.txt").
+All flags have a long name (like \-\-force) and can optionally have a short name (like \-f). Flags may require a value, where the flag name and value is separated by an equals (like \-\-maxdepth=10). Note that the flag name and value are both individually one token. There can be whitespace before and after the equals (=).
 
 ## Inputs (Arguments & Flags)
 

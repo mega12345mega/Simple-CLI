@@ -1,70 +1,108 @@
 package com.luneruniverse.simplecli;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Optional;
 
 public class CommandStream {
 	
-	public static CommandStream parse(String cmd) throws CommandSyntaxException {
-		List<String> args = new ArrayList<>();
-		
-		StringBuilder arg = new StringBuilder();
+	private final char[] cmd;
+	private int cmdIndex;
+	
+	public CommandStream(String cmd) {
+		// cmd.trim() with Character.isWhitespace
+		int start = 0;
+		int end = cmd.length();
+		while (start < end && Character.isWhitespace(cmd.charAt(start)))
+			start++;
+		while (start < end && Character.isWhitespace(cmd.charAt(end - 1)))
+			end--;
+		this.cmd = new char[end - start];
+		cmd.getChars(start, end, this.cmd, 0);
+	}
+	
+	private char peekChar() {
+		return cmd[cmdIndex];
+	}
+	
+	private char readChar() {
+		return cmd[cmdIndex++];
+	}
+	
+	private boolean hasNextChar() {
+		return cmdIndex < cmd.length;
+	}
+	
+	private String readString(Character stopChar) throws CommandSyntaxException {
+		StringBuilder output = new StringBuilder();
 		boolean quoted = false;
 		boolean escaped = false;
 		
-		for (char c : cmd.toCharArray()) {
+		while (hasNextChar()) {
+			char c = readChar();
 			if (escaped) {
-				arg.append(c);
+				output.append(c);
 				escaped = false;
 			} else if (c == '\\') {
 				escaped = true;
 			} else if (c == '"') {
 				if (quoted) {
-					args.add(arg.toString());
-					arg = new StringBuilder();
-					quoted = false;
-				} else if (arg.length() == 0) {
+					if (hasNextChar()) {
+						c = peekChar();
+						if (stopChar != null && c == stopChar || Character.isWhitespace(c))
+							return output.toString();
+						throw new CommandSyntaxException("Unexpected '" + c + "'");
+					} else {
+						return output.toString();
+					}
+				} else if (output.length() == 0) {
 					quoted = true;
 				} else {
 					throw new CommandSyntaxException("Unexpected unescaped '\"'");
 				}
 			} else if (!quoted && Character.isWhitespace(c)) {
-				if (arg.length() != 0) {
-					args.add(arg.toString());
-					arg = new StringBuilder();
-				}
+				if (output.length() != 0)
+					return output.toString();
+			} else if (stopChar != null && c == stopChar) {
+				cmdIndex--;
+				break;
 			} else {
-				arg.append(c);
+				output.append(c);
 			}
 		}
 		
 		if (quoted)
 			throw new CommandSyntaxException("Unclosed '\"'");
 		if (escaped)
-			throw new CommandSyntaxException("Unexpected '\\'");
+			throw new CommandSyntaxException("Incomplete '\\'");
 		
-		if (arg.length() != 0)
-			args.add(arg.toString());
-		
-		return new CommandStream(args.toArray(new String[args.size()]));
+		return output.toString();
 	}
 	
-	private final String[] args;
-	private int index;
-	
-	public CommandStream(String[] args) {
-		this.args = args;
-	}
-	
-	public Optional<String> read() {
-		if (index == args.length)
+	public Optional<String> readArg() throws CommandSyntaxException {
+		if (!hasNext())
 			return Optional.empty();
-		return Optional.of(args[index++]);
+		return Optional.of(readString(null));
+	}
+	
+	public Optional<Map.Entry<String, Optional<String>>> readFlag() throws CommandSyntaxException {
+		if (!hasNext())
+			return Optional.empty();
+		
+		String name = readString('=');
+		
+		while (hasNextChar() && Character.isWhitespace(peekChar()))
+			readChar();
+		if (!hasNextChar() || peekChar() != '=')
+			return Optional.of(new AbstractMap.SimpleImmutableEntry<>(name, Optional.empty()));
+		readChar();
+		
+		return Optional.of(new AbstractMap.SimpleImmutableEntry<>(name, Optional.of(readString(null))));
 	}
 	
 	public boolean hasNext() {
-		return index != args.length;
+		// Works as whitespace characters are already removed from the end of cmd
+		return hasNextChar();
 	}
 	
 }
